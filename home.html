@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07030a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Secret Santa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icone/icona-192.png">
+<link rel="apple-touch-icon" href="icone/icona-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<title>Secret Santa — Home</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: salotto fotografico con camino come sfondo fisso; pannelli di vetro fumé con dettagli in oro */
+:root{
+  --bg:#0b0704;
+  --fg:#f6eedc;
+  --gold:#e8b84b;
+  --gold-deep:#a97c1f;
+  --red:#c1272d;
+  --vetro:rgba(18,10,6,.58);
+  --bordo:rgba(232,184,75,.42);
+  color-scheme:dark;
+}
+html{height:100%}
+body{min-height:100%; margin:0; background:var(--bg); color:var(--fg); font-family:"Spectral",Georgia,serif;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px))}
+#sfondo{position:fixed; inset:0; z-index:0; background:url("foto/salotto.jpg") center/cover no-repeat;
+  filter:saturate(1.05); transform:scale(1.04)}
+#sfondo::after{content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(8,5,3,.5), rgba(8,5,3,.25) 30%, rgba(8,5,3,.55) 75%, rgba(8,5,3,.85))}
+#bagliore{position:fixed; z-index:0; left:28%; top:34%; width:50vw; height:30vh; pointer-events:none;
+  background:radial-gradient(closest-side, rgba(255,150,50,.22), transparent); animation:fuoco 3.2s ease-in-out infinite}
+@keyframes fuoco{0%,100%{opacity:.7}30%{opacity:1}55%{opacity:.8}75%{opacity:.95}}
+#neve{position:fixed; inset:0; z-index:1; pointer-events:none}
+main{position:relative; z-index:2; max-width:430px; margin:0 auto; display:flex; flex-direction:column; gap:14px;
+  padding-block:10px 28px; text-align:center}
+.vetro{background:var(--vetro); border:1px solid var(--bordo); border-radius:16px;
+  -webkit-backdrop-filter:blur(10px) saturate(1.2); backdrop-filter:blur(10px) saturate(1.2);
+  box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,235,190,.12)}
+.etich{font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin:0 0 10px}
+#badge{align-self:center; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:rgba(246,238,220,.7);
+  border:1px solid rgba(246,238,220,.3); border-radius:999px; padding:3px 12px; background:rgba(8,5,3,.55)}
+header h1{font-family:"Cinzel",serif; font-weight:900; margin:0; font-size:30px; letter-spacing:.06em;
+  background:linear-gradient(180deg,#fff2c9,var(--gold) 45%,var(--gold-deep) 70%,#f7df9a);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.9)) drop-shadow(0 0 12px rgba(255,120,60,.35))}
+header p{font-size:14.5px; margin:2px 0 0; text-shadow:0 1px 6px rgba(0,0,0,.9)}
+/* countdown */
+#conto{padding:14px 10px 12px}
+#cifre{display:flex; justify-content:center; gap:8px}
+.cella{flex:1; max-width:86px; border-radius:10px; padding:9px 2px 6px;
+  background:linear-gradient(180deg,rgba(255,235,190,.1),rgba(0,0,0,.25)); border:1px solid rgba(232,184,75,.3)}
+.cella b{display:block; font-family:"Cinzel",serif; font-size:clamp(25px,7.5vw,34px); font-weight:900;
+  font-variant-numeric:tabular-nums; line-height:1.1; color:#fff3d6; text-shadow:0 0 14px rgba(255,170,80,.45)}
+.cella span{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(246,238,220,.7)}
+#data-serata{font-size:12px; margin:10px 0 0; opacity:.8; font-style:italic}
+/* Babbo del giorno: foto vera, viso sostituito */
+#babbo-card{padding:14px 12px 14px}
+#cornice{position:relative; width:min(78%,300px); margin:0 auto; aspect-ratio:600/720; border-radius:6px; overflow:hidden;
+  border:6px solid #2a1a0c; outline:2px solid var(--gold-deep); box-shadow:0 10px 26px rgba(0,0,0,.6)}
+#cornice img{width:100%; height:100%; object-fit:cover; display:block}
+#viso{position:absolute; left:42.3%; top:27.5%; width:18%; height:16.5%; border-radius:50%;
+  display:grid; place-items:center; font-size:clamp(28px,9vw,40px);
+  background:radial-gradient(circle at 45% 40%, #f2c9a8, #d9a07c 70%);
+  -webkit-mask:radial-gradient(closest-side, #000 78%, transparent 100%); mask:radial-gradient(closest-side, #000 78%, transparent 100%);
+  animation:ammicca 4s ease-in-out infinite}
+@keyframes ammicca{0%,92%,100%{transform:rotate(0)}95%{transform:rotate(-7deg)}98%{transform:rotate(5deg)}}
+#babbo-nome{font-family:"Cinzel",serif; font-weight:700; font-size:21px; color:var(--gold); margin:10px 0 0; letter-spacing:.06em}
+#babbo-sotto{font-size:12.5px; opacity:.75; margin:3px 0 0; font-style:italic}
+/* sezioni */
+#sezioni{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+#sezioni button{font-family:"Cinzel",serif; font-weight:700; font-size:14px; letter-spacing:.04em; cursor:pointer;
+  color:var(--fg); padding:16px 4px 13px; display:flex; flex-direction:column; gap:8px; align-items:center}
+#sezioni svg{width:34px; height:34px; stroke:var(--gold); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round;
+  filter:drop-shadow(0 0 6px rgba(232,184,75,.35))}
+#sezioni button:active{transform:scale(.96)}
+#sezioni button:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
+#crediti{font-size:10px; opacity:.55; margin:6px 0 0}
+/* toast */
+#toast{position:fixed; z-index:8; left:50%; bottom:26px; transform:translate(-50%,140%); transition:transform .4s cubic-bezier(.2,1.3,.4,1);
+  background:#fdf7e3; color:#241503; font-size:14px; border-radius:999px; padding:9px 18px; box-shadow:0 8px 24px rgba(0,0,0,.5); white-space:nowrap}
+#toast.su{transform:translate(-50%,0)}
+/* elfo guardiano: il salotto si spegne */
+#elfo{position:fixed; inset:0; z-index:9; display:grid; place-items:center; text-align:center; padding:24px;
+  opacity:0; pointer-events:none; transition:opacity .8s}
+#elfo.attivo{opacity:1; pointer-events:auto}
+#elfo::before{content:""; position:absolute; inset:0; background:url("foto/salotto.jpg") center/cover;
+  filter:brightness(.28) saturate(.5) hue-rotate(185deg)}
+#elfo .scatola{position:relative; max-width:36ch; display:flex; flex-direction:column; gap:10px; align-items:center}
+#elfo .faccia-elfo{font-size:84px; line-height:1; animation:dondola 1.6s ease-in-out infinite}
+@keyframes dondola{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+#elfo h2{font-family:"Cinzel",serif; color:var(--gold); margin:0; font-size:21px; letter-spacing:.06em}
+#elfo p{margin:0; font-size:15.5px}
+#elfo small{opacity:.55; font-size:11px}
+#elfo button{font-family:"Spectral",serif; font-size:15px; cursor:pointer; color:var(--fg); background:none;
+  border:2px solid var(--gold); border-radius:999px; padding:.5em 1.6em; margin-top:8px}
+#prova-notte{position:fixed; z-index:7; bottom:calc(env(safe-area-inset-bottom,0px) + 10px); right:max(12px,env(safe-area-inset-right,0px));
+  font-size:12px; cursor:pointer; color:rgba(246,238,220,.85); background:rgba(8,5,3,.7);
+  border:1px solid rgba(246,238,220,.3); border-radius:999px; padding:6px 12px}
+@media (prefers-reduced-motion:reduce){
+  #elfo .faccia-elfo,#viso,#bagliore{animation:none}
+}
+#viso{background-size:cover; background-position:center 35%}
+</style>
+</head>
+<body>
+
+<div id="sfondo"></div>
+<div id="bagliore"></div>
+<canvas id="neve"></canvas>
+
+<main id="principale">
+
+  <header>
+    <h1>Secret Santa</h1>
+    <p>Ciao, <b id="mio-nome"></b></p>
+  </header>
+
+  <section id="conto" class="vetro" aria-label="Conto alla rovescia">
+    <p class="etich">Alla serata dello scambio</p>
+    <div id="cifre">
+      <div class="cella"><b id="gg">—</b><span>giorni</span></div>
+      <div class="cella"><b id="hh">—</b><span>ore</span></div>
+      <div class="cella"><b id="mm">—</b><span>minuti</span></div>
+      <div class="cella"><b id="ss">—</b><span>secondi</span></div>
+    </div>
+    <p id="data-serata"></p>
+  </section>
+
+  <section id="babbo-card" class="vetro" aria-label="Babbo del giorno">
+    <p class="etich">Il Babbo Natale di oggi</p>
+    <div id="cornice">
+      <img src="foto/babbo.jpg" alt="Babbo Natale che saluta dalla parata">
+      <div id="viso"></div>
+    </div>
+    <p id="babbo-nome">—</p>
+    <p id="babbo-sotto">Domani tocca a qualcun altro.</p>
+  </section>
+
+  <nav id="sezioni" aria-label="Sezioni">
+    <button class="vetro" data-vai="sorteggio.html"><svg viewBox="0 0 32 32"><rect x="4" y="7" width="22" height="20" rx="3"/><rect x="7.5" y="12" width="4.5" height="7" rx="1"/><rect x="12.8" y="12" width="4.5" height="7" rx="1"/><rect x="18.1" y="12" width="4.5" height="7" rx="1"/><path d="M26 12h2v-4"/><circle cx="28" cy="6.5" r="1.6"/><path d="M9 23.5h12"/></svg>Sorteggio</button>
+    <button class="vetro" data-vai="regole.html"><svg viewBox="0 0 32 32"><path d="M9 5h15a3 3 0 0 1 0 6h-2v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-2h14"/><path d="M9 5a3 3 0 0 0-3 3v15"/><path d="M10.5 13h7M10.5 17h7M10.5 21h4"/></svg>Regole</button>
+    <button class="vetro" data-vai="fanta-santa.html"><svg viewBox="0 0 32 32"><path d="M10 4h12v8a6 6 0 0 1-12 0z"/><path d="M10 7H5.5a4 4 0 0 0 4.5 6M22 7h4.5a4 4 0 0 1-4.5 6"/><path d="M16 18v5M11 28h10M12.5 28l1-5h5l1 5"/></svg>Fanta-Santa</button>
+  </nav>
+
+  <p id="crediti">Foto Babbo Natale: Jon Sullivan, pubblico dominio</p>
+</main>
+
+
+<div id="elfo" role="dialog" aria-modal="true">
+  <div class="scatola">
+    <h2>È tardi</h2>
+    <p>Vai a dormire: i regali non scappano.</p>
+    <button id="elfo-chiudi">Buonanotte</button>
+  </div>
+</div>
+
+
+<script>
+// ---- neve leggera davanti alla finestra ----
+const cv=document.getElementById('neve'),cx=cv.getContext('2d');
+let W,H,fiocchi=[];
+const ridotto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function dimensiona(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+  const n=ridotto?0:Math.min(60,Math.floor(W*H/22000));
+  fiocchi=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,
+    r:.8+Math.random()*1.8,v:.3+Math.random()*.7,o:.2+Math.random()*.4,s:Math.random()*6.28}));}
+dimensiona();addEventListener('resize',dimensiona);
+(function anima(){cx.clearRect(0,0,W,H);cx.fillStyle='#fff';
+  for(const f of fiocchi){f.y+=f.v;f.s+=.01;f.x+=Math.sin(f.s)*.4;
+    if(f.y>H+4){f.y=-4;f.x=Math.random()*W}
+    cx.globalAlpha=f.o;cx.beginPath();cx.arc(f.x,f.y,f.r,0,6.28);cx.fill();}
+  cx.globalAlpha=1;requestAnimationFrame(anima);})();
+
+// ---- accesso e data della serata (decisa nello script del foglio) ----
+const io=SS.richiediAccesso();
+document.getElementById('mio-nome').textContent=io?io.nome:'';
+let SERATA=new Date(SS.dati().dataSerata||Date.now());
+function scriviData(){
+  document.getElementById('data-serata').textContent=SERATA.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})+
+    ', ore '+SERATA.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+scriviData();
+SS.api('stato').then(s=>{if(s.dataSerata){SERATA=new Date(s.dataSerata);scriviData();}}).catch(()=>{});
+function conto(){
+  let d=Math.max(0,SERATA-new Date());
+  const gg=Math.floor(d/86400000); d-=gg*86400000;
+  const hh=Math.floor(d/3600000); d-=hh*3600000;
+  const mm=Math.floor(d/60000); d-=mm*60000;
+  const ss=Math.floor(d/1000);
+  const z=n=>String(n).padStart(2,'0');
+  document.getElementById('gg').textContent=gg;
+  document.getElementById('hh').textContent=z(hh);
+  document.getElementById('mm').textContent=z(mm);
+  document.getElementById('ss').textContent=z(ss);
+}
+conto();setInterval(conto,1000);
+
+// ---- Babbo del giorno: uno degli 8, diverso ogni giorno ----
+const nomi=SS.dati().partecipanti;
+
+const idx=Math.floor(Date.now()/86400000)%8;
+const viso=document.getElementById('viso');viso.textContent='';viso.style.backgroundImage='url("'+SS.foto(nomi[idx])+'")';
+document.getElementById('babbo-nome').textContent=nomi[idx];
+
+// ---- suoni veri ----
+const sfx={};
+function suono(n){try{const a=sfx[n]||(sfx[n]=new Audio('suoni/'+n+'.mp3'));a.currentTime=0;
+  const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+
+// ---- le tre sezioni ----
+document.querySelectorAll('#sezioni button[data-vai]').forEach(b=>b.addEventListener('click',()=>location.href=b.dataset.vai));
+
+// ---- messaggio notturno (23–6) ----
+const elfo=document.getElementById('elfo');
+const ora=new Date().getHours();
+if(ora>=23||ora<6)elfo.classList.add('attivo');
+document.getElementById('elfo-chiudi').addEventListener('click',()=>elfo.classList.remove('attivo'));
+</script>
+</body>
+</html>

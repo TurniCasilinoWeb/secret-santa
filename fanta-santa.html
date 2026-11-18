@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07030a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Secret Santa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icone/icona-192.png">
+<link rel="apple-touch-icon" href="icone/icona-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<title>Secret Santa — Fanta-Santa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Cinzel:wght@700;900&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: "La notte delle buste" — gala rosso e oro come la slot; buste dorate da compilare, sala d'attesa, cerimonia con podio */
+:root{
+  --notte:#07030a;
+  --vino:#2a0610;
+  --rosso:#b3121c;
+  --rosso-scuro:#5a050b;
+  --oro:#f0c35a;
+  --oro-scuro:#9c6f1c;
+  --avorio:#fbf3df;
+  --busta:#f3e2b8;
+  --busta-scura:#dcc38a;
+  --inchiostro:#3a1c08;
+  --fg:#fbf1dc;
+  color-scheme:dark;
+}
+html{min-height:100%}
+body{margin:0; min-height:100%; color:var(--fg); font-family:"Spectral",Georgia,serif;
+  background:radial-gradient(120% 80% at 50% 20%, var(--vino), var(--notte) 70%) fixed;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px))}
+#bokeh{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+#bokeh i{position:absolute; border-radius:50%; filter:blur(10px); opacity:.3; animation:galleggia linear infinite}
+@keyframes galleggia{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+main{position:relative; z-index:1; max-width:460px; margin:0 auto; padding-block:54px 40px}
+.vista{display:none}
+.vista.attiva{display:block; animation:appare .5s ease}
+@keyframes appare{from{opacity:0; transform:translateY(10px)}to{opacity:1}}
+/* intestazione */
+.testa{text-align:center; margin:6px 0 18px}
+.testa h1{font-family:"Limelight","Cinzel",serif; font-weight:400; margin:0; font-size:clamp(38px,11vw,54px); line-height:1;
+  background:linear-gradient(180deg,#fff6d2 10%,var(--oro) 50%,var(--oro-scuro) 88%); -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 3px 0 #4a2a05) drop-shadow(0 0 16px rgba(255,200,90,.45))}
+.testa .sotto{font-family:"Cinzel",serif; font-weight:700; font-size:12px; letter-spacing:.34em; text-transform:uppercase; color:#ffe1a0; margin:8px 0 0}
+.testa .spiega{font-size:15.5px; line-height:1.45; margin:12px auto 0; max-width:36ch; opacity:.92}
+#avanzamento{display:flex; align-items:center; gap:10px; margin:0 2px 14px; font-size:13.5px}
+#avanzamento .barra{flex:1; height:7px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden}
+#avanzamento .barra i{display:block; height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,var(--oro-scuro),var(--oro)); transition:width .4s}
+/* ritratti: foto dei partecipanti */
+.volto{flex:none; border-radius:50%; display:grid; place-items:center; font-family:"Limelight",serif; color:#ffe6a0;
+  background:radial-gradient(circle at 38% 32%, #d4242d, #6e0710); box-shadow:inset 0 0 0 3px var(--oro), 0 3px 8px rgba(0,0,0,.35); text-shadow:0 2px 0 #4a0408}
+/* ===== buste ===== */
+#buste{display:flex; flex-direction:column; gap:14px}
+.busta{position:relative; border-radius:12px; color:var(--inchiostro); overflow:hidden;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.35), transparent 40%),
+    linear-gradient(180deg, var(--busta), var(--busta-scura));
+  box-shadow:0 10px 22px rgba(0,0,0,.5), inset 0 0 0 1px rgba(120,80,20,.35)}
+/* la "V" del lembo della busta */
+.busta::before{content:""; position:absolute; left:0; right:0; top:0; height:64px; pointer-events:none;
+  background:linear-gradient(to bottom right, transparent 49.4%, rgba(120,80,20,.28) 50%, transparent 50.8%) left/50% 100% no-repeat,
+             linear-gradient(to bottom left, transparent 49.4%, rgba(120,80,20,.28) 50%, transparent 50.8%) right/50% 100% no-repeat}
+.fronte{position:relative; width:100%; display:flex; align-items:center; gap:12px; padding:16px 14px; border:0; background:none; cursor:pointer;
+  text-align:left; font:inherit; color:inherit}
+.fronte:focus-visible{outline:3px solid var(--oro-scuro); outline-offset:-4px; border-radius:12px}
+.fronte .volto{width:54px; height:54px; font-size:28px}
+.fronte .domanda{flex:1; min-width:0}
+.fronte .domanda small{display:block; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:#7a4e1a}
+.fronte .domanda b{display:block; font-family:"Cinzel",serif; font-weight:900; font-size:21px; letter-spacing:.02em; line-height:1.15}
+/* sigillo di ceralacca: "?" vuoto, iniziale scelta */
+.sigillo{flex:none; width:58px; height:58px; border-radius:50%; display:grid; place-items:center; position:relative;
+  font-family:"Limelight",serif; font-size:26px; color:#ffd9c4;
+  background:radial-gradient(circle at 38% 32%, #d93a30, #8a1410 60%, #5c0a08); box-shadow:0 3px 6px rgba(0,0,0,.4), inset 0 -3px 6px rgba(0,0,0,.35)}
+.sigillo::after{content:""; position:absolute; inset:5px; border-radius:50%; border:2px dashed rgba(255,210,190,.45)}
+.busta:not(.fatta) .sigillo{background:rgba(120,80,20,.15); color:#9a7440; box-shadow:inset 0 0 0 2px rgba(120,80,20,.35)}
+.busta:not(.fatta) .sigillo::after{display:none}
+.busta.fatta .sigillo{animation:timbra .35s cubic-bezier(.3,1.7,.5,1)}
+@keyframes timbra{from{transform:scale(1.6) rotate(-20deg); opacity:0}}
+.risposta{display:block; font-size:13.5px; margin-top:2px; color:#7a1a10; font-style:italic}
+/* lettera interna con le facce */
+.lettera{display:grid; grid-template-rows:0fr; transition:grid-template-rows .4s ease}
+.busta.aperta .lettera{grid-template-rows:1fr}
+.lettera>div{overflow:hidden}
+.scelte{margin:0 12px 14px; padding:14px 10px 12px; border-radius:8px; background:var(--avorio);
+  box-shadow:inset 0 0 0 1px rgba(120,80,20,.25), 0 -6px 12px rgba(120,80,20,.15);
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(68px,1fr)); gap:10px 6px}
+.scelte p{grid-column:1/-1; margin:0 0 2px; font-size:13px; color:#7a4e1a; text-align:center}
+.candidato{display:flex; flex-direction:column; align-items:center; gap:5px; border:0; background:none; cursor:pointer; font:inherit; color:var(--inchiostro); padding:4px 2px; border-radius:10px}
+.candidato .volto{width:50px; height:50px; font-size:25px; transition:transform .2s, box-shadow .2s}
+.candidato span{font-size:12.5px; font-weight:600}
+.candidato[aria-pressed="true"] .volto{transform:scale(1.1); box-shadow:inset 0 0 0 3px var(--oro), 0 0 0 4px var(--inchiostro), 0 0 14px rgba(200,140,40,.8)}
+.candidato:disabled{cursor:not-allowed}
+.candidato:disabled .volto{filter:grayscale(1) brightness(.75); opacity:.45}
+.candidato:disabled span{opacity:.5}
+.candidato em{font-style:normal; font-size:10.5px; color:#7a1a10; line-height:1.1}
+.vicolo{grid-column:1/-1; margin:2px 0 0; padding:8px 10px; border-radius:6px; background:rgba(142,27,18,.1); color:#7a1a10; font-size:13px; text-align:center}
+.candidato:focus-visible{outline:2px solid var(--oro-scuro)}
+/* busta del proprio regalo: già nota */
+.busta.mia{background:linear-gradient(180deg,#e9dcc0,#cdbb91); opacity:.92}
+.busta.mia .fronte{cursor:default}
+.busta.mia .sigillo{background:radial-gradient(circle at 38% 32%, #f3d27a, #a8781c 65%, #6f4c0e); color:#3a1c08; font-size:22px}
+.busta.mia .sigillo::after{border-color:rgba(60,30,5,.35)}
+/* pulsanti oro */
+.oro{width:100%; font-family:"Limelight","Cinzel",serif; font-size:clamp(18px,5.2vw,22px); letter-spacing:.06em; cursor:pointer; color:#3a1700;
+  border:0; border-radius:999px; padding:14px 18px; background:linear-gradient(180deg,#fff1bd,var(--oro) 50%,var(--oro-scuro));
+  box-shadow:0 0 0 3px #ffe7a6, 0 0 26px rgba(255,190,80,.45), 0 10px 20px rgba(0,0,0,.6)}
+.oro:disabled{cursor:not-allowed; filter:grayscale(.85) brightness(.6); box-shadow:0 0 0 2px rgba(255,231,166,.35)}
+.oro:not(:disabled):active{transform:scale(.97)}
+.oro:focus-visible{outline:3px solid #fff; outline-offset:4px}
+#zona-carica{margin-top:22px; text-align:center}
+#zona-carica p{margin:8px 0 0; font-size:13px; opacity:.75}
+/* conferma */
+#conferma{position:fixed; inset:0; z-index:8; display:grid; place-items:center; padding:24px; background:rgba(5,2,4,.85);
+  opacity:0; pointer-events:none; transition:opacity .3s}
+#conferma.attivo{opacity:1; pointer-events:auto}
+#conferma .riquadro{max-width:340px; text-align:center; padding:24px 20px; border-radius:16px; background:rgba(30,10,12,.95);
+  border:1px solid rgba(240,195,90,.5); box-shadow:0 16px 40px rgba(0,0,0,.6)}
+#conferma h2{font-family:"Limelight",serif; font-weight:400; color:var(--oro); margin:0 0 8px; font-size:24px}
+#conferma p{margin:0 0 18px; font-size:15px; line-height:1.4}
+#conferma .riga{display:flex; flex-direction:column; gap:10px}
+.secondario{font-family:"Spectral",serif; font-size:15px; cursor:pointer; color:var(--fg); background:none; border:2px solid rgba(240,195,90,.6); border-radius:999px; padding:10px 16px}
+/* ===== attesa ===== */
+#consegnati{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px 6px; margin:8px 0 24px}
+.ospite{display:flex; flex-direction:column; align-items:center; gap:6px; font-size:13px; min-width:0; transition:opacity .4s}
+.ospite .volto{width:min(64px,18vw); height:min(64px,18vw); font-size:32px; transition:filter .5s, box-shadow .5s}
+.ospite:not(.ok) .volto{filter:grayscale(1) brightness(.45); box-shadow:inset 0 0 0 3px rgba(240,195,90,.3)}
+.ospite:not(.ok){opacity:.7}
+.ospite.ok .volto{box-shadow:inset 0 0 0 3px var(--oro), 0 0 18px rgba(255,200,90,.6)}
+.ospite .stato{font-size:10px; letter-spacing:.02em; text-transform:uppercase; color:#ffe1a0}
+.ospite:not(.ok) .stato{color:rgba(251,241,220,.55)}
+.ospite.appena .volto{animation:accende .6s cubic-bezier(.3,1.7,.5,1)}
+@keyframes accende{from{transform:scale(.6)}}
+#contatore{text-align:center; font-family:"Cinzel",serif; font-weight:900; font-size:20px; margin:0 0 18px; letter-spacing:.04em}
+#contatore b{color:var(--oro); font-size:26px}
+#btn-rivela:not(:disabled){animation:pronto 1.4s ease-in-out infinite}
+@keyframes pronto{50%{box-shadow:0 0 0 3px #ffe7a6, 0 0 50px rgba(255,190,80,.9), 0 10px 20px rgba(0,0,0,.6)}}
+#nota-attesa{text-align:center; font-size:13px; opacity:.75; margin:10px 0 0}
+#btn-aggiorna{display:block; margin:0 auto 14px; min-width:170px}
+#btn-aggiorna[aria-busy="true"]{opacity:.6; cursor:wait}
+#aggiornato{text-align:center; font-size:12.5px; opacity:.7; margin:-6px 0 14px; min-height:1.2em}
+/* ===== cerimonia ===== */
+#cerimonia{position:fixed; inset:0; z-index:6; overflow-y:auto; display:none; padding:56px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));
+  background:radial-gradient(circle at 50% 18%, #3a0912, #07030a 70%)}
+#cerimonia.attiva{display:block}
+.faro{position:fixed; top:-10vh; width:42vw; height:120vh; pointer-events:none; mix-blend-mode:screen; opacity:.5;
+  background:linear-gradient(180deg, rgba(255,230,170,.55), rgba(255,230,170,0) 85%); clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);
+  transform-origin:50% 0}
+#faro1{left:4vw; animation:spazza 6s ease-in-out infinite alternate}
+#faro2{right:4vw; animation:spazza 6s ease-in-out infinite alternate-reverse}
+@keyframes spazza{from{transform:rotate(-22deg)}to{transform:rotate(18deg)}}
+#palco{position:relative; max-width:460px; margin:0 auto; text-align:center}
+#annuncio{font-family:"Limelight",serif; font-size:clamp(30px,9vw,44px); margin:6px 0 4px; line-height:1.05;
+  background:linear-gradient(180deg,#fff6d2 10%,var(--oro) 50%,var(--oro-scuro) 88%); -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 3px 0 #4a2a05)}
+#sotto-annuncio{font-size:14px; opacity:.8; margin:0 0 18px}
+/* podio */
+#podio{display:grid; grid-template-columns:1fr 1.15fr 1fr; align-items:end; gap:8px; margin:6px 0 22px; min-height:250px}
+.gradino{display:flex; flex-direction:column; align-items:center; opacity:0; transform:translateY(40px); transition:all .8s cubic-bezier(.2,1.3,.4,1)}
+.gradino.su{opacity:1; transform:none}
+.gradino .volto{width:64px; height:64px; font-size:32px; margin-bottom:6px}
+.gradino.p1 .volto{width:84px; height:84px; font-size:42px}
+.gradino .chi{font-family:"Cinzel",serif; font-weight:900; font-size:14px; letter-spacing:.02em}
+.gradino .pti{font-size:13px; opacity:.85; margin-bottom:6px}
+.blocco{width:100%; border-radius:8px 8px 2px 2px; display:grid; place-items:center; font-family:"Limelight",serif; font-size:30px; color:#3a1700;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5), 0 10px 20px rgba(0,0,0,.5)}
+.p1 .blocco{height:120px; background:linear-gradient(180deg,#fff1bd,var(--oro) 45%,var(--oro-scuro))}
+.p2 .blocco{height:88px; background:linear-gradient(180deg,#ffffff,#c9ced3 45%,#7d838a)}
+.p3 .blocco{height:64px; background:linear-gradient(180deg,#ffd9b0,#c9864a 45%,#7a4a1f)}
+.corona{width:46px; height:30px; margin-bottom:2px; filter:drop-shadow(0 0 10px rgba(255,200,90,.9))}
+/* classifica completa */
+#righe{display:flex; flex-direction:column; gap:8px; text-align:left}
+.riga-cl{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; background:rgba(30,10,12,.75);
+  border:1px solid rgba(240,195,90,.3); opacity:0; transform:translateX(-30px); transition:all .5s cubic-bezier(.2,1.2,.4,1)}
+.riga-cl.su{opacity:1; transform:none}
+.riga-cl .pos{width:34px; font-family:"Limelight",serif; font-size:22px; color:var(--oro); text-align:center}
+.riga-cl .volto{width:42px; height:42px; font-size:21px}
+.riga-cl .chi{flex:1; font-family:"Cinzel",serif; font-weight:900; font-size:16px}
+.riga-cl .pti{font-family:"Cinzel",serif; font-weight:700; font-size:15px; white-space:nowrap}
+.riga-cl .pti small{opacity:.6; font-weight:400}
+.riga-cl.io{border-color:var(--oro); box-shadow:0 0 16px rgba(240,195,90,.35)}
+.riga-cl.io .chi::after{content:" · tu"; font-family:"Spectral",serif; font-weight:400; font-size:13px; color:var(--oro)}
+#spareggio{font-size:13px; font-style:italic; opacity:.75; margin:12px 0 0}
+#fine-cerimonia{margin-top:24px; opacity:0; transition:opacity .8s}
+#fine-cerimonia.su{opacity:1}
+/* comandi anteprima */
+#anteprima{position:fixed; z-index:9; top:calc(env(safe-area-inset-top,0px) + 8px); right:max(10px,env(safe-area-inset-right,0px)); display:flex; gap:6px}
+#anteprima button{font-family:"Spectral",serif; font-size:11.5px; cursor:pointer; color:rgba(251,241,220,.85); background:rgba(7,3,10,.7);
+  border:1px solid rgba(251,241,220,.3); border-radius:999px; padding:5px 10px}
+#badge{display:inline-block; margin-top:10px; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:rgba(251,241,220,.7);
+  border:1px solid rgba(251,241,220,.28); border-radius:999px; padding:3px 12px}
+#coriandoli{position:fixed; inset:0; z-index:7; pointer-events:none}
+@media (prefers-reduced-motion:reduce){
+  .faro,#btn-rivela:not(:disabled),#bokeh i{animation:none}
+  .gradino,.riga-cl{transition:none}
+}
+.volto{background-size:cover; background-position:center}
+#torna{position:fixed; z-index:20; top:calc(env(safe-area-inset-top,0px) + 10px); left:max(10px,env(safe-area-inset-left,0px)); font-family:Georgia,serif; font-size:13px; color:#fbf1dc; text-decoration:none; background:rgba(10,4,4,.62); border:1px solid rgba(251,241,220,.35); border-radius:999px; padding:6px 12px; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px)}
+#torna:focus-visible{outline:3px solid #ffd98a; outline-offset:2px}
+</style>
+</head>
+<body>
+<a id="torna" href="home.html">← Home</a>
+
+<div id="bokeh"></div>
+
+<main>
+  <!-- 1. compilazione -->
+  <!-- 0. caricamento / chiuso fino alla serata -->
+  <section class="vista attiva" id="v-attendi">
+    <div class="testa">
+      <h1>Fanta-Santa</h1>
+      <p class="sotto">La notte delle buste</p>
+      <p class="spiega" id="testo-attendi">Un attimo…</p>
+    </div>
+    <button class="secondario" id="btn-riprova" hidden style="display:block;margin:0 auto">Riprova</button>
+  </section>
+
+  <section class="vista" id="v-compila">
+    <div class="testa">
+      <h1>Fanta-Santa</h1>
+      <p class="sotto">La notte delle buste</p>
+      <p class="spiega">Per ognuno, scegli chi secondo te gli ha fatto il regalo. Un punto per ogni abbinamento indovinato.</p>
+    </div>
+    <div id="avanzamento"><span id="testo-avanz">0 su 6 buste</span><div class="barra"><i></i></div></div>
+    <div id="buste"></div>
+    <div id="zona-carica">
+      <button class="oro" id="btn-carica" disabled>Carica le mie ipotesi</button>
+      <p>Una volta caricate non si possono più cambiare</p>
+    </div>
+  </section>
+
+  <!-- 2. attesa -->
+  <section class="vista" id="v-attesa">
+    <div class="testa">
+      <h1>Buste consegnate</h1>
+      <p class="sotto">In attesa degli altri</p>
+      <p class="spiega">La classifica si sblocca quando tutti e 8 avranno caricato le loro ipotesi.</p>
+    </div>
+    <p id="contatore"><b>1</b> su 8</p>
+    <div id="consegnati"></div>
+    <button class="secondario" id="btn-aggiorna">↻ Aggiorna</button>
+    <p id="aggiornato" aria-live="polite"></p>
+    <button class="oro" id="btn-rivela" disabled>🔒 Rivela la classifica</button>
+    <p id="nota-attesa">La pagina si aggiorna da sola ogni 30 secondi.</p>
+  </section>
+</main>
+
+<!-- 3. cerimonia -->
+<section id="cerimonia" aria-live="polite">
+  <div class="faro" id="faro1"></div><div class="faro" id="faro2"></div>
+  <div id="palco">
+    <p id="annuncio">E la classifica è…</p>
+    <p id="sotto-annuncio">Fanta-Santa 2026</p>
+    <div id="podio">
+      <div class="gradino p2" id="g2"></div>
+      <div class="gradino p1" id="g1"></div>
+      <div class="gradino p3" id="g3"></div>
+    </div>
+    <div id="righe"></div>
+    <p id="spareggio" hidden>A parità di punti vince chi ha consegnato prima le buste</p>
+    <div id="fine-cerimonia"><button class="oro" id="btn-home">Torna alla Home</button></div>
+  </div>
+</section>
+
+<div id="conferma" role="dialog" aria-modal="true" aria-labelledby="conf-titolo">
+  <div class="riquadro">
+    <h2 id="conf-titolo">Sigilli le buste?</h2>
+    <p>Dopo il caricamento le tue ipotesi non si potranno più cambiare.</p>
+    <div class="riga">
+      <button class="oro" id="conf-si">Sì, carica</button>
+      <button class="secondario" id="conf-no">Aspetta, ricontrollo</button>
+      <p id="conf-errore" role="alert" style="margin:4px 0 0;color:#ffb4a8;font-size:14px" hidden></p>
+    </div>
+  </div>
+</div>
+<canvas id="coriandoli"></canvas>
+
+<script>
+// ===== partecipanti, coppie e il tuo abbinamento (dallo script del foglio) =====
+const io=SS.richiediAccesso();
+const D=SS.dati();
+const P=D.partecipanti;
+const partner=i=>{const p=D.coppie&&D.coppie[P[i]];return p?P.indexOf(p):(i^1);};
+const IO=io?P.indexOf(io.nome):0;
+const ridotto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let MIO=-1;                                  // chi ha ricevuto il TUO regalo (lo sai già, non conta)
+let CLASSIFICA=null;                         // arriva dallo script quando hanno consegnato tutti
+// candidati possibili come autori del regalo a x (non x, non tu, non il partner di x)
+function candidati(x,io){return [...Array(8).keys()].filter(c=>c!==x&&c!==io&&c!==partner(x));}
+
+// ===== sfondo =====
+const bok=document.getElementById('bokeh');const tinte=['#ff3b3b','#ffcf5a','#3bd16f','#ff8a3d','#fff2c4'];
+for(let i=0;i<20;i++){const b=document.createElement('i');const s=20+Math.random()*90;
+  Object.assign(b.style,{width:s+'px',height:s+'px',left:Math.random()*100+'%',top:Math.random()*100+'%',background:tinte[i%tinte.length],
+  animationDuration:(6+Math.random()*8)+'s',animationDelay:(-Math.random()*8)+'s'});bok.appendChild(b);}
+
+// ===== audio (registrazioni vere, Web Audio) =====
+const FILE=['tic','campanella','carta-apri','carta-chiudi','rullo','colpo','fanfara','applausi'];
+let ac=null;const buf={},grezzi={};
+FILE.forEach(n=>fetch('suoni/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>{grezzi[n]=b;if(ac)dec(n);}).catch(()=>{}));
+function dec(n){const b=grezzi[n];if(!b||buf[n])return;grezzi[n]=null;ac.decodeAudioData(b).then(d=>buf[n]=d).catch(()=>{});}
+function sblocca(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}FILE.forEach(dec);}if(ac.state==='suspended')ac.resume();}
+addEventListener('pointerdown',sblocca,{capture:true});
+function suona(n,{vol=1,vel=1,ritardo=0}={}){if(!ac||!buf[n])return null;const s=ac.createBufferSource(),g=ac.createGain();
+  s.buffer=buf[n];s.playbackRate.value=vel;g.gain.value=vol;s.connect(g).connect(ac.destination);s.start(ac.currentTime+ritardo);return{s,g};}
+function sfuma(h,dopo,dur=1.5){if(!h||!ac)return;const t=ac.currentTime+dopo;h.g.gain.setValueAtTime(h.g.gain.value,t);
+  h.g.gain.linearRampToValueAtTime(.0001,t+dur);h.s.stop(t+dur+.05);}
+
+// ===== 1. compilazione =====
+const scelte={};                         // x -> donatore ipotizzato
+const daIndovinare=()=>[...Array(8).keys()].filter(x=>x!==IO&&x!==MIO);
+const volto=(i,cls='')=>'<span class="volto '+cls+'" aria-hidden="true" style="background-image:url(&quot;'+SS.foto(P[i])+'&quot;)"></span>';
+function costruisciBuste(){
+  const box=document.getElementById('buste');box.innerHTML='';
+  [...Array(8).keys()].filter(x=>x!==IO).forEach(x=>{
+    const b=document.createElement('div');b.className='busta';b.dataset.x=x;
+    if(x===MIO){
+      b.classList.add('mia','fatta');
+      b.innerHTML='<div class="fronte">'+volto(x)+'<div class="domanda"><small>Il regalo a</small><b>'+P[x]+'</b>'+
+        '<span class="risposta">L’hai fatto tu: lo sai già, non conta</span></div><span class="sigillo" aria-hidden="true">🎁</span></div>';
+    }else{
+      b.innerHTML='<button class="fronte" aria-expanded="false">'+volto(x)+'<span class="domanda"><small>Chi ha fatto il regalo a</small><b>'+P[x]+'</b>'+
+        '<span class="risposta"></span></span><span class="sigillo" aria-hidden="true">?</span></button>'+
+        '<div class="lettera"><div><div class="scelte"><p>Secondo te, chi è stato?</p>'+
+        candidati(x,IO).map(c=>'<button class="candidato" data-c="'+c+'" aria-pressed="false">'+volto(c)+'<span>'+P[c]+'</span><em></em></button>').join('')+
+        '<p class="vicolo" hidden>Le persone possibili qui sono già tutte usate in altre buste: riaprine una e cambia la scelta.</p>'+
+        '</div></div></div>';
+      b.querySelector('.fronte').addEventListener('click',()=>apriChiudi(b));
+      b.querySelectorAll('.candidato').forEach(btn=>btn.addEventListener('click',()=>scegli(b,x,+btn.dataset.c)));
+    }
+    box.appendChild(b);
+  });
+  aggiorna();
+}
+function apriChiudi(b,forza){
+  const apri=forza??!b.classList.contains('aperta');
+  document.querySelectorAll('.busta.aperta').forEach(o=>{if(o!==b){o.classList.remove('aperta');o.querySelector('.fronte').setAttribute('aria-expanded','false');}});
+  b.classList.toggle('aperta',apri);b.querySelector('.fronte').setAttribute('aria-expanded',apri);
+  suona(apri?'carta-apri':'carta-chiudi',{vol:.7});
+}
+function scegli(b,x,c){
+  scelte[x]=c;suona('tic',{vol:.8});
+  b.querySelector('.risposta').textContent='Secondo te: '+P[c];
+  const s=b.querySelector('.sigillo');s.textContent=P[c][0];
+  b.classList.remove('fatta');void b.offsetWidth;b.classList.add('fatta');
+  aggiorna();
+  setTimeout(()=>{apriChiudi(b,false);
+    const prossima=[...document.querySelectorAll('.busta:not(.mia):not(.fatta)')][0];   // apre la prossima vuota
+    if(prossima)setTimeout(()=>{apriChiudi(prossima,true);prossima.scrollIntoView({behavior:'smooth',block:'center'});},350);
+  },450);
+}
+// una persona fa un solo regalo: chi è già scelto in una busta è spento nelle altre
+function aggiornaDisponibili(){
+  const usatoPer={};Object.keys(scelte).forEach(y=>{usatoPer[scelte[y]]=+y;});
+  document.querySelectorAll('.busta:not(.mia)').forEach(b=>{
+    const x=+b.dataset.x;let liberi=0;
+    b.querySelectorAll('.candidato').forEach(k=>{
+      const c=+k.dataset.c, altrove=usatoPer[c]!==undefined&&usatoPer[c]!==x;
+      k.disabled=altrove;k.querySelector('em').textContent=altrove?'già per '+P[usatoPer[c]]:'';
+      k.setAttribute('aria-pressed',scelte[x]===c);
+      if(!altrove)liberi++;
+    });
+    b.querySelector('.vicolo').hidden=!(liberi===0&&scelte[x]===undefined);
+  });
+}
+function aggiorna(){
+  aggiornaDisponibili();
+  const n=daIndovinare().filter(x=>scelte[x]!==undefined).length;
+  document.getElementById('testo-avanz').textContent=n+' su 6 buste';
+  document.querySelector('#avanzamento .barra i').style.width=(n/6*100)+'%';
+  document.getElementById('btn-carica').disabled=n<6;
+}
+document.getElementById('btn-carica').addEventListener('click',()=>document.getElementById('conferma').classList.add('attivo'));
+document.getElementById('conf-no').addEventListener('click',()=>document.getElementById('conferma').classList.remove('attivo'));
+document.getElementById('conf-si').addEventListener('click',async()=>{
+  const si=document.getElementById('conf-si'),err=document.getElementById('conf-errore');
+  const ipotesi={};daIndovinare().forEach(x=>{ipotesi[P[x]]=P[scelte[x]];});
+  si.disabled=true;si.textContent='Consegna in corso…';err.hidden=true;
+  try{
+    await SS.api('ipotesi',{ipotesi});
+    document.getElementById('conferma').classList.remove('attivo');
+    suona('campanella',{vol:.8});
+    caricato.add(IO);mostra('v-attesa');aggiornaStato();
+  }catch(e){err.textContent=e.message;err.hidden=false;}
+  finally{si.disabled=false;si.textContent='Sì, carica';}
+});
+
+// ===== 2. attesa =====
+let caricato=new Set();
+function mostra(id){document.querySelectorAll('.vista').forEach(v=>v.classList.toggle('attiva',v.id===id));scrollTo({top:0,behavior:'smooth'});
+  if(id==='v-attesa')disegnaAttesa();}
+function disegnaAttesa(appena){
+  const box=document.getElementById('consegnati');box.innerHTML='';
+  P.forEach((n,i)=>{const d=document.createElement('div');d.className='ospite'+(caricato.has(i)?' ok':'')+(i===appena?' appena':'');
+    d.innerHTML=volto(i)+'<span>'+n+'</span><span class="stato">'+(caricato.has(i)?'consegnato':'in attesa')+'</span>';box.appendChild(d);});
+  document.querySelector('#contatore b').textContent=caricato.size;
+  const tutti=caricato.size===8,btn=document.getElementById('btn-rivela');
+  btn.disabled=!tutti;btn.textContent=tutti?'Rivela la classifica':'🔒 Rivela la classifica';
+  document.getElementById('nota-attesa').hidden=tutti;
+}
+// ===== 3. cerimonia =====
+function conPosizioni(cl){cl.forEach((r,k)=>r.pos=k+1);return cl;}
+const corona='<svg class="corona" viewBox="0 0 46 30"><path d="M3 26 6 7l9 9 8-13 8 13 9-9 3 19z" fill="#f0c35a" stroke="#9c6f1c" stroke-width="1.5"/><circle cx="6" cy="6" r="2.4" fill="#fff1bd"/><circle cx="23" cy="3" r="2.4" fill="#fff1bd"/><circle cx="40" cy="6" r="2.4" fill="#fff1bd"/></svg>';
+function cerimonia(){
+  if(!CLASSIFICA)return;
+  const cl=CLASSIFICA.map(r=>({io:P.indexOf(r.nome),pti:r.punti,pos:r.pos}));
+  const cer=document.getElementById('cerimonia');cer.classList.add('attiva');cer.scrollTop=0;
+  ['g1','g2','g3'].forEach(id=>{const g=document.getElementById(id);g.className='gradino '+id.replace('g','p');g.innerHTML='';});
+  document.getElementById('righe').innerHTML='';document.getElementById('fine-cerimonia').classList.remove('su');
+  document.getElementById('annuncio').textContent='E la classifica è…';
+  const rullo=suona('rullo',{vol:.8});
+  const coda=cl.slice(3).reverse();                       // dall'ultimo al quarto
+  let t=2600;
+  coda.forEach(r=>{setTimeout(()=>{suona('colpo',{vol:.6});aggiungiRiga(r,true);},t);t+=900;});
+  setTimeout(()=>{document.getElementById('annuncio').textContent='Il podio';suona('rullo',{vol:.9});},t);t+=2400;
+  [[2,'g3'],[1,'g2'],[0,'g1']].forEach(([k,id],i)=>{
+    setTimeout(()=>{const r=cl[k];if(!r)return;const g=document.getElementById(id);
+      g.innerHTML=(k===0?corona:'')+volto(r.io)+'<span class="chi">'+P[r.io]+(r.io===IO?' (tu)':'')+'</span><span class="pti">'+r.pti+' / 6 punti</span><div class="blocco">'+r.pos+'</div>';
+      g.classList.add('su');suona(k===0?'fanfara':'colpo',{vol:k===0?.9:.7});
+      if(k===0){const a=suona('applausi',{vol:.6,ritardo:.4});sfuma(a,7,3);coriandoli(220);setTimeout(()=>coriandoli(160),900);
+        document.getElementById('annuncio').textContent='Vince '+P[r.io]+'!';}
+    },t+i*1600);});
+  t+=3*1600+600;
+  setTimeout(()=>{cl.slice(0,3).forEach(r=>aggiungiRiga(r,false));                  // classifica completa sotto il podio
+    const righe=[...document.querySelectorAll('.riga-cl')].sort((a,b)=>a.dataset.pos-b.dataset.pos);righe.forEach(r=>document.getElementById('righe').appendChild(r));
+    document.getElementById('spareggio').hidden=!cl.some((r,k)=>k>0&&r.pti===cl[k-1].pti);
+    document.getElementById('fine-cerimonia').classList.add('su');},t);
+}
+function aggiungiRiga(r,inCima){
+  const d=document.createElement('div');d.className='riga-cl'+(r.io===IO?' io':'');d.dataset.pos=r.pos;
+  d.innerHTML='<span class="pos">'+r.pos+'°</span>'+volto(r.io)+'<span class="chi">'+P[r.io]+'</span><span class="pti">'+r.pti+' <small>/ 6</small></span>';
+  const box=document.getElementById('righe');inCima?box.prepend(d):box.appendChild(d);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>d.classList.add('su')));
+}
+document.getElementById('btn-rivela').addEventListener('click',cerimonia);
+// ===== stato dallo script: chi ha consegnato, classifica =====
+async function aggiornaStato(silenzioso){
+  const s=await SS.api('stato');
+  const prima=new Set(caricato);
+  caricato=new Set(s.consegnati.map(n=>P.indexOf(n)).filter(i=>i>=0));
+  CLASSIFICA=s.classifica;
+  const nuovo=[...caricato].find(i=>!prima.has(i)&&i!==IO);
+  if(nuovo!==undefined&&prima.size&&!silenzioso)suona('campanella',{vol:.4});
+  if(document.getElementById('v-attesa').classList.contains('attiva'))disegnaAttesa(prima.size?nuovo:undefined);
+  return s;
+}
+document.getElementById('btn-aggiorna').addEventListener('click',async()=>{
+  const b=document.getElementById('btn-aggiorna'),info=document.getElementById('aggiornato');
+  if(b.getAttribute('aria-busy')==='true')return;
+  b.setAttribute('aria-busy','true');b.textContent='Controllo…';info.textContent='';
+  const ora=()=>new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  try{const prima=caricato.size;await aggiornaStato();
+    info.textContent=(caricato.size>prima?'Novità':'Nessuna novità')+' · aggiornato alle '+ora();}
+  catch(e){info.textContent=e.message;}
+  finally{b.removeAttribute('aria-busy');b.textContent='↻ Aggiorna';}
+});
+document.getElementById('btn-home').addEventListener('click',()=>location.href='home.html');
+
+// ===== coriandoli =====
+const cv=document.getElementById('coriandoli'),cx=cv.getContext('2d');let pezzi=[],vivo=false;
+function dimC(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);}
+dimC();addEventListener('resize',dimC);
+const colori=['#e0141e','#f0c35a','#1f9a4c','#ffffff','#ffd98a'];
+function coriandoli(n){if(ridotto)return;for(let i=0;i<n;i++)pezzi.push({x:innerWidth*(.05+Math.random()*.9),y:-20-Math.random()*innerHeight*.4,vx:(Math.random()-.5)*3,
+  vy:2+Math.random()*3,r:4+Math.random()*4,a:Math.random()*6,va:(Math.random()-.5)*.3,c:colori[i%colori.length],o:Math.random()*6,vita:0});
+  if(!vivo){vivo=true;requestAnimationFrame(passo);}}
+function passo(){cx.clearRect(0,0,innerWidth,innerHeight);
+  pezzi.forEach(q=>{q.vita++;q.o+=.05;q.x+=q.vx+Math.sin(q.o)*1.2;q.y+=q.vy;q.a+=q.va;cx.save();cx.translate(q.x,q.y);cx.rotate(q.a);
+    cx.scale(1,Math.abs(Math.cos(q.o*1.7))+.2);cx.fillStyle=q.c;cx.fillRect(-q.r,-q.r*.4,q.r*2,q.r*.8);cx.restore();});
+  pezzi=pezzi.filter(q=>q.y<innerHeight+40&&q.vita<900);if(pezzi.length)requestAnimationFrame(passo);else{vivo=false;cx.clearRect(0,0,innerWidth,innerHeight);}}
+
+// ===== avvio: chiuso fino alla serata, buste da compilare o sala d'attesa =====
+async function avvio(){
+  const testo=document.getElementById('testo-attendi'),riprova=document.getElementById('btn-riprova');
+  testo.textContent='Un attimo…';riprova.hidden=true;
+  try{
+    const s=await SS.api('stato');
+    MIO=P.indexOf(s.destinatario);
+    caricato=new Set(s.consegnati.map(n=>P.indexOf(n)).filter(i=>i>=0));
+    CLASSIFICA=s.classifica;
+    if(!s.fantaAperto){
+      const d=new Date(s.dataSerata);
+      testo.textContent='Il Fanta-Santa si apre dopo la serata: '+d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'})+
+        ', ore '+d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})+'.';
+      return;
+    }
+    if(s.ioConsegnato)mostra('v-attesa');
+    else{costruisciBuste();mostra('v-compila');}
+  }catch(e){testo.textContent=e.message;riprova.hidden=false;}
+}
+document.getElementById('btn-riprova').addEventListener('click',avvio);
+avvio();
+// mentre aspetti gli altri: un controllo ogni 30 secondi (e subito quando torni sull'app)
+setInterval(()=>{if(document.getElementById('v-attesa').classList.contains('attiva')&&!document.hidden&&!CLASSIFICA)aggiornaStato().catch(()=>{});},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&document.getElementById('v-attesa').classList.contains('attiva'))aggiornaStato().catch(()=>{});});
+</script>
+</body>
+</html>

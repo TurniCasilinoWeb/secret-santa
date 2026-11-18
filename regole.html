@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07030a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Secret Santa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icone/icona-192.png">
+<link rel="apple-touch-icon" href="icone/icona-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<title>Secret Santa — Regole</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Holtwood+One+SC&family=IM+Fell+English:ital@0;1&display=swap">
+<style>
+/* Layout: bacheca dello sceriffo — assi di legno vere, manifesti su carta antica inchiodati, apertura a schermo pieno */
+:root{
+  --legno:#3a2414;
+  --inchiostro:#2b1a0c;
+  --inchiostro-chiaro:#5a3a1c;
+  --rosso:#8e1b12;
+  --carta:#e9d6ac;
+  --fg:#f4e6c8;
+  color-scheme:dark;
+}
+html{min-height:100%}
+body{margin:0; min-height:100%; color:var(--fg); font-family:"IM Fell English",Georgia,serif;
+  background:var(--legno) url("foto/legno.jpg") center top/440px repeat;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px))}
+/* luce calda di lampada a olio + angoli in ombra */
+#luce{position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(70% 45% at 50% 0%, rgba(255,190,110,.32), transparent 70%),
+    radial-gradient(130% 100% at 50% 40%, transparent 45%, rgba(10,4,1,.78) 100%)}
+main{position:relative; z-index:1; max-width:520px; margin:0 auto; padding-block:58px 40px}
+/* avviso del regolamento */
+#avviso{position:relative; margin:6px 2px 34px; container-type:inline-size; color:var(--inchiostro);
+  transform:rotate(-.6deg); filter:drop-shadow(0 12px 14px rgba(0,0,0,.6))}
+#avviso.arriva{animation:inchioda .6s cubic-bezier(.2,1.5,.4,1) both; --r:-.6deg}
+#avviso .foglio{aspect-ratio:auto; padding:9cqw 8cqw 7cqw; text-align:center}
+#avviso .chiodo{width:4.4cqw; height:4.4cqw; top:2.6cqw; margin-left:0}
+#avviso .chiodo.sx{left:4cqw}
+#avviso .chiodo.dx{left:auto; right:4cqw}
+#avviso h1{font-family:"Rye",serif; font-weight:400; font-size:12.5cqw; line-height:1; margin:2cqw 0 1.4cqw; letter-spacing:.02em}
+#avviso .ordine{font-family:"Holtwood One SC",serif; font-size:3.4cqw; letter-spacing:.1em; margin:0 0 4cqw}
+#articoli{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3.6cqw; text-align:left}
+#articoli li{display:grid; grid-template-columns:auto 1fr; gap:3cqw; align-items:baseline;
+  padding-top:3.4cqw; border-top:.4cqw dashed rgba(90,58,28,.45)}
+#articoli .art{font-family:"Holtwood One SC",serif; font-size:3.4cqw; letter-spacing:.06em; color:var(--rosso); white-space:nowrap}
+#articoli .testo{font-size:5.2cqw; line-height:1.25}
+#articoli .testo b{font-family:"Rye",serif; font-weight:400; font-size:6cqw; color:var(--rosso)}
+#avviso .firma{margin:5cqw 0 0; text-align:right; font-style:italic; font-size:4cqw; color:var(--inchiostro-chiaro)}
+/* titolo della bacheca, bruciato nel legno */
+.bruciato{text-align:center; margin:0 0 16px}
+.bruciato h2{font-family:"Rye",serif; font-weight:400; margin:0; font-size:clamp(28px,8.4vw,42px); letter-spacing:.04em; color:#2a1406;
+  text-shadow:0 1px 0 rgba(255,220,170,.35), 0 -1px 0 rgba(0,0,0,.6)}
+.bruciato p{margin:4px 0 0; font-style:italic; font-size:15px; color:#f1dcb4; text-shadow:0 1px 4px rgba(0,0,0,.9)}
+#badge-riga{text-align:center; margin-bottom:12px}
+#badge{display:inline-block; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:rgba(244,230,200,.75);
+  border:1px solid rgba(244,230,200,.3); border-radius:999px; padding:3px 12px; background:rgba(20,10,4,.55); font-family:Georgia,serif}
+/* bacheca */
+#bacheca{display:grid; grid-template-columns:1fr 1fr; gap:22px 16px; padding:6px 4px}
+.manifesto{position:relative; cursor:pointer; border:0; padding:0; background:none; text-align:center; color:var(--inchiostro);
+  transform:rotate(var(--r,0deg)); transition:transform .25s; container-type:inline-size;
+  filter:drop-shadow(0 8px 10px rgba(0,0,0,.55))}
+.manifesto:hover,.manifesto:focus-visible{transform:rotate(0deg) scale(1.03)}
+.manifesto:focus-visible{outline:3px solid #ffd98a; outline-offset:4px}
+.manifesto.arriva{animation:inchioda .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes inchioda{from{opacity:0; transform:translateY(-40px) rotate(calc(var(--r) * 4)) scale(1.15)}to{opacity:1}}
+.foglio{position:relative; aspect-ratio:3/4.2; padding:9cqw 8cqw 8cqw;
+  background:var(--carta) url("foto/carta.jpg") center/cover; clip-path:var(--bordo);
+  box-shadow:inset 0 0 6cqw rgba(110,60,15,.55)}
+.chiodo{position:absolute; left:50%; top:3.5cqw; width:6cqw; height:6cqw; margin-left:-3cqw; border-radius:50%; z-index:2;
+  background:radial-gradient(circle at 35% 30%, #e8e2d6, #7b746a 50%, #2e2a25); box-shadow:0 1.5cqw 1.5cqw rgba(0,0,0,.45)}
+.mini-titolo{font-family:"Rye",serif; font-size:14cqw; line-height:1; margin:2cqw 0 0; color:var(--inchiostro)}
+.mini-foto{margin:5cqw auto 4cqw; width:62cqw; aspect-ratio:1; display:grid; place-items:center;
+  font-family:"Holtwood One SC",serif; font-size:30cqw; color:rgba(245,230,195,.92);
+  background:radial-gradient(circle at 45% 38%, #9b7d55, #4b3520 80%); box-shadow:0 0 0 1.4cqw var(--inchiostro), inset 0 0 6cqw rgba(0,0,0,.55);
+  filter:sepia(.4) contrast(1.05)}
+.mini-nome{font-family:"Holtwood One SC",serif; font-size:9.5cqw; line-height:1.05; margin:0; text-transform:uppercase; word-break:break-word}
+.mini-taglia{font-family:"Rye",serif; font-size:8.5cqw; margin:3cqw 0 0; color:var(--rosso)}
+
+/* ===== manifesto aperto ===== */
+#aperto{position:fixed; inset:0; z-index:5; display:grid; place-items:center; padding:20px 16px;
+  background:rgba(12,5,2,.82); opacity:0; pointer-events:none; transition:opacity .35s}
+#aperto.attivo{opacity:1; pointer-events:auto}
+#grande{position:relative; width:min(88vw,400px, calc((100dvh - 110px) * .714)); container-type:inline-size; color:var(--inchiostro);
+  filter:drop-shadow(0 20px 30px rgba(0,0,0,.7)); transition:transform .55s cubic-bezier(.2,1.2,.35,1), opacity .18s}
+#grande .foglio{aspect-ratio:3/4.2; padding:9cqw 8cqw 7cqw; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center}
+#grande .chiodo{width:5cqw; height:5cqw; margin-left:-2.5cqw; top:2.6cqw}
+.riga-fregi{display:flex; align-items:center; gap:3cqw; width:100%; color:var(--inchiostro-chiaro); font-size:3.4cqw; letter-spacing:.3em; text-transform:uppercase}
+.riga-fregi::before,.riga-fregi::after{content:""; flex:1; height:.6cqw; background:currentColor; opacity:.7}
+#g-titolo{font-family:"Rye",serif; font-weight:400; font-size:15.5cqw; line-height:.95; margin:2cqw 0 1cqw; letter-spacing:.02em}
+#g-sotto{font-family:"Holtwood One SC",serif; font-size:4.2cqw; margin:0; letter-spacing:.08em}
+#g-foto{margin:5cqw auto 5cqw; width:62cqw; aspect-ratio:1/1.08; display:grid; place-items:center;
+  font-family:"Holtwood One SC",serif; font-size:26cqw; color:rgba(245,230,195,.92);
+  background:radial-gradient(circle at 45% 38%, #9b7d55, #4b3520 80%); box-shadow:0 0 0 1.2cqw var(--inchiostro), 0 0 0 2.4cqw var(--carta), 0 0 0 3cqw var(--inchiostro), inset 0 0 6cqw rgba(0,0,0,.55);
+  filter:sepia(.4) contrast(1.05)}
+#g-nome{font-family:"Holtwood One SC",serif; font-size:9.6cqw; line-height:1; margin:0; text-transform:uppercase}
+#g-taglia-et{font-family:"Rye",serif; font-size:5cqw; margin:3.2cqw 0 0; letter-spacing:.1em}
+#g-taglia{font-family:"Rye",serif; font-size:15cqw; line-height:1; margin:0; color:var(--rosso); text-shadow:.3cqw .3cqw 0 rgba(0,0,0,.15)}
+#g-firma{margin-top:auto; font-size:3.3cqw; font-style:italic; color:var(--inchiostro-chiaro)}
+/* navigazione */
+.nav{position:fixed; top:50%; z-index:6; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; cursor:pointer;
+  border:2px solid rgba(244,230,200,.6); background:rgba(30,14,6,.75); color:var(--fg); font-size:22px; font-family:Georgia,serif}
+#prec{left:max(8px,env(safe-area-inset-left,0px))}
+#succ{right:max(8px,env(safe-area-inset-right,0px))}
+#chiudi{position:fixed; z-index:6; top:calc(env(safe-area-inset-top,0px) + 12px); right:max(12px,env(safe-area-inset-right,0px));
+  cursor:pointer; font-family:Georgia,serif; font-size:14px; color:var(--fg); background:rgba(30,14,6,.75); border:1px solid rgba(244,230,200,.5);
+  border-radius:999px; padding:6px 14px}
+#aperto:not(.attivo) ~ .nav,#aperto:not(.attivo) ~ #chiudi{display:none}
+.nav:focus-visible,#chiudi:focus-visible{outline:3px solid #ffd98a; outline-offset:2px}
+/* ingresso anteprima */
+#ingresso{position:fixed; inset:0; z-index:9; display:grid; place-items:center; text-align:center; padding:24px;
+  background:rgba(12,5,2,.88); transition:opacity .5s}
+#ingresso.via{opacity:0; pointer-events:none}
+#ingresso button{font-family:"Rye",serif; font-size:22px; cursor:pointer; color:#2a1406; border:0; border-radius:10px; padding:14px 28px;
+  background:var(--carta) url("foto/carta.jpg") center/cover; box-shadow:0 10px 24px rgba(0,0,0,.6)}
+#ingresso p{margin:12px 0 0; font-size:13px; opacity:.7}
+#crediti{text-align:center; font-size:10.5px; opacity:.55; margin-top:26px; font-family:Georgia,serif}
+@media (prefers-reduced-motion:reduce){
+  .manifesto.arriva{animation:none} #grande{transition:none}
+}
+.mini-foto,#g-foto{background-size:cover; background-position:center}
+#torna{position:fixed; z-index:20; top:calc(env(safe-area-inset-top,0px) + 10px); left:max(10px,env(safe-area-inset-left,0px)); font-family:Georgia,serif; font-size:13px; color:#fbf1dc; text-decoration:none; background:rgba(10,4,4,.62); border:1px solid rgba(251,241,220,.35); border-radius:999px; padding:6px 12px; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px)}
+#torna:focus-visible{outline:3px solid #ffd98a; outline-offset:2px}
+</style>
+</head>
+<body>
+<a id="torna" href="home.html">← Home</a>
+
+<div id="luce"></div>
+<main>
+  <article id="avviso" aria-labelledby="titolo-regole">
+    <div class="foglio" id="foglio-avviso">
+      <div class="chiodo sx"></div><div class="chiodo dx"></div>
+      <div class="riga-fregi">★ Secret Santa 2026 ★</div>
+      <h1 id="titolo-regole">Regolamento</h1>
+      <p class="ordine">Valido per tutti, senza eccezioni</p>
+      <ol id="articoli">
+        <li><span class="art">Art. 1</span><span class="testo">Budget: <b>20 euro</b>.</span></li>
+        <li><span class="art">Art. 2</span><span class="testo">Il regalo deve essere <b>divertente</b>.</span></li>
+        <li><span class="art">Art. 3</span><span class="testo">Vietato dire o far capire a chi si fa il regalo, e chi lo ha fatto a chi, finché il <b>Fanta-Santa</b> non è chiuso.</span></li>
+      </ol>
+    </div>
+  </article>
+  <div class="bruciato">
+    <h2>I ricercati</h2>
+    <p>Taglia per tutti: 20 € · tocca un manifesto</p>
+  </div>
+  <section id="bacheca" aria-label="Manifesti dei ricercati"></section>
+  <p id="crediti">Legno: Amal Kumar / Poly Haven, CC0 · Carta: pubblico dominio · Suoni: Mixkit</p>
+</main>
+
+<div id="aperto" role="dialog" aria-modal="true" aria-labelledby="g-nome">
+  <div id="grande">
+    <div class="foglio">
+      <div class="chiodo"></div>
+      <div class="riga-fregi">★ Secret Santa 2026 ★</div>
+      <h2 id="g-titolo">Ricercato</h2>
+      <div id="g-foto"></div>
+      <p id="g-nome">Davide</p>
+      <p id="g-taglia-et">Taglia</p>
+      <p id="g-taglia">20 €</p>
+    </div>
+  </div>
+</div>
+<button class="nav" id="prec" aria-label="Manifesto precedente">‹</button>
+<button class="nav" id="succ" aria-label="Manifesto successivo">›</button>
+<button id="chiudi">✕ Rimetti in bacheca</button>
+
+
+<script>
+// ---- i ricercati (genere per RICERCATO/A; difetti: li scrive Davide) ----
+SS.richiediAccesso();
+const R=[
+  {n:'Davide',g:'m'},{n:'Angelica',g:'f'},{n:'Enza',g:'f'},{n:'Daniele',g:'m'},
+  {n:'Francesco',g:'m'},{n:'Alessandra',g:'f'},{n:'Andrea',g:'m'},{n:'Chiara',g:'f'}
+];
+
+// ---- suoni veri ----
+const sfx={};
+function suono(n,vol){try{const a=sfx[n]||(sfx[n]=new Audio('suoni/'+n+'.mp3'));a.currentTime=0;a.volume=vol??1;
+  const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+
+// ---- bordo strappato: un poligono irregolare diverso per ogni foglio ----
+function bordoStrappato(seme){
+  let s=seme*9301+49297;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
+  const pts=[];const N=14;
+  for(let i=0;i<=N;i++)pts.push([i/N*100,rnd()*1.8]);
+  for(let i=1;i<=N;i++)pts.push([100-rnd()*1.6,i/N*100]);
+  for(let i=1;i<=N;i++)pts.push([100-i/N*100,100-rnd()*2.2]);
+  for(let i=1;i<N;i++)pts.push([rnd()*1.6,100-i/N*100]);
+  return 'polygon('+pts.map(p=>p[0].toFixed(1)+'% '+p[1].toFixed(1)+'%').join(',')+')';
+}
+
+// ---- avviso del regolamento: bordo strappato ----
+document.getElementById('foglio-avviso').style.setProperty('--bordo',bordoStrappato(99));
+
+// ---- bacheca ----
+const bacheca=document.getElementById('bacheca');
+R.forEach((r,i)=>{
+  const b=document.createElement('button');b.className='manifesto';b.dataset.i=i;
+  const rot=((i*37)%7-3)*0.9;b.style.setProperty('--r',rot+'deg');
+  b.setAttribute('aria-label','Apri il manifesto di '+r.n);
+  b.innerHTML='<div class="foglio" style="--bordo:'+bordoStrappato(i+1)+'"><div class="chiodo"></div>'+
+    '<p class="mini-titolo">'+(r.g==='f'?'Ricercata':'Ricercato')+'</p>'+
+    '<div class="mini-foto" style="background-image:url(&quot;'+SS.foto(r.n)+'&quot;)"></div><p class="mini-nome">'+r.n+'</p><p class="mini-taglia">Taglia 20 €</p></div>';
+  b.addEventListener('click',()=>apri(i,b));
+  bacheca.appendChild(b);
+});
+
+// ---- ingresso: prima il regolamento (due chiodi), poi i manifesti uno a uno ----
+// (i suoni partono se il telefono li permette senza un tocco; l'animazione parte comunque)
+(function ingresso(){
+  suono('chitarra',.7);
+  const avviso=document.getElementById('avviso');
+  avviso.style.opacity='0';
+  [...bacheca.children].forEach(m=>m.style.opacity='0');
+  setTimeout(()=>{avviso.style.opacity='';avviso.classList.add('arriva');suono('martello',.9);},450);
+  setTimeout(()=>suono('martello',.9),700);
+  [...bacheca.children].forEach((m,i)=>{
+    setTimeout(()=>{m.style.opacity='';m.classList.add('arriva');suono('martello',.75);},1300+i*230);
+  });
+})();
+
+// ---- manifesto aperto ----
+const aperto=document.getElementById('aperto'),grande=document.getElementById('grande');
+let corrente=0;
+function riempi(i){
+  const r=R[i];corrente=i;
+  document.getElementById('g-titolo').textContent=r.g==='f'?'Ricercata':'Ricercato';
+  document.getElementById('g-foto').style.backgroundImage='url("'+SS.foto(r.n)+'")';
+  document.getElementById('g-nome').textContent=r.n;
+  grande.querySelector('.foglio').style.setProperty('--bordo',bordoStrappato(i+20));
+}
+function apri(i,da){
+  riempi(i);suono('carta-apri',.9);
+  // parte dalla posizione del manifesto piccolo
+  const a=da.getBoundingClientRect();
+  aperto.classList.add('attivo');
+  const g=grande.getBoundingClientRect();
+  const dx=(a.left+a.width/2)-(g.left+g.width/2), dy=(a.top+a.height/2)-(g.top+g.height/2), sc=a.width/g.width;
+  grande.style.transition='none';grande.style.opacity='1';
+  grande.style.transform='translate('+dx+'px,'+dy+'px) scale('+sc+') rotate('+getComputedStyle(da).getPropertyValue('--r')+')';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{grande.style.transition='';grande.style.transform='none';}));
+}
+function chiudi(){suono('carta-chiudi',.8);aperto.classList.remove('attivo');}
+function sfoglia(d){
+  suono('carta-sfoglia',.8);
+  grande.style.transform='translateX('+(-d*30)+'px) rotate('+(-d*4)+'deg)';grande.style.opacity='0';
+  setTimeout(()=>{riempi((corrente+d+R.length)%R.length);grande.style.transition='none';
+    grande.style.transform='translateX('+(d*30)+'px) rotate('+(d*4)+'deg)';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{grande.style.transition='';grande.style.opacity='1';grande.style.transform='none';}));},180);
+}
+document.getElementById('chiudi').addEventListener('click',chiudi);
+document.getElementById('prec').addEventListener('click',()=>sfoglia(-1));
+document.getElementById('succ').addEventListener('click',()=>sfoglia(1));
+aperto.addEventListener('click',e=>{if(e.target===aperto)chiudi();});
+addEventListener('keydown',e=>{if(!aperto.classList.contains('attivo'))return;
+  if(e.key==='Escape')chiudi();if(e.key==='ArrowLeft')sfoglia(-1);if(e.key==='ArrowRight')sfoglia(1);});
+// scorrimento col dito
+let x0=null;
+aperto.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+aperto.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50)sfoglia(dx<0?1:-1);});
+</script>
+</body>
+</html>
