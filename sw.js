@@ -1,7 +1,7 @@
 // Rende l'app installabile e più veloce: tiene in memoria sul telefono foto, suoni e pagine.
 // Le richieste allo script del foglio Google NON passano di qui: vanno sempre in rete.
 // Se modifichi il sito, aumenta il numero di VERSIONE: così i telefoni scaricano i file nuovi.
-const VERSIONE = 'secret-santa-3';
+const VERSIONE = 'secret-santa-4';
 
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 

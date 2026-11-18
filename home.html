@@ -63,6 +63,19 @@ header p{font-size:14.5px; margin:2px 0 0; text-shadow:0 1px 6px rgba(0,0,0,.9)}
 #data-serata{font-size:12px; margin:10px 0 0; opacity:.8; font-style:italic}
 /* Babbo del giorno: foto vera, viso sostituito */
 #babbo-card{padding:14px 12px 14px}
+/* il tuo regalo: in cima, sempre visibile dopo il sorteggio */
+#regalo{padding:16px 14px 18px}
+#regalo .volto-regalo{width:min(46vw,170px); aspect-ratio:1; margin:6px auto 10px; border-radius:50%;
+  background:#3a2a22 center/cover; box-shadow:inset 0 0 0 5px var(--gold), 0 0 0 3px #fff2c4, 0 0 34px rgba(255,200,90,.55)}
+#regalo .nome-regalo{font-family:"Cinzel",serif; font-weight:900; font-size:28px; margin:0; letter-spacing:.04em; color:var(--gold);
+  text-shadow:0 2px 8px rgba(0,0,0,.8)}
+#regalo .nota{font-size:12.5px; opacity:.75; margin:6px 0 0; font-style:italic}
+#regalo p.invito{margin:0 0 12px; font-size:15.5px}
+#regalo .vai{font-family:"Cinzel",serif; font-weight:900; font-size:16px; letter-spacing:.08em; cursor:pointer; color:#2a1502; border:0;
+  border-radius:999px; padding:12px 26px; background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,#a97c1f); box-shadow:0 0 0 2px #fff2c4, 0 6px 14px rgba(0,0,0,.5)}
+#esci{font-family:"Spectral",serif; font-size:12.5px; cursor:pointer; color:var(--fg); background:rgba(0,0,0,.35);
+  border:1px solid rgba(246,238,220,.35); border-radius:999px; padding:3px 10px; margin-left:6px; vertical-align:1px}
+#esci:focus-visible,#regalo .vai:focus-visible{outline:3px solid var(--gold); outline-offset:2px}
 #cornice{position:relative; width:min(78%,300px); margin:0 auto; aspect-ratio:600/720; border-radius:6px; overflow:hidden;
   border:6px solid #2a1a0c; outline:2px solid var(--gold-deep); box-shadow:0 10px 26px rgba(0,0,0,.6)}
 #cornice img{width:100%; height:100%; object-fit:cover; display:block}
@@ -120,8 +133,22 @@ header p{font-size:14.5px; margin:2px 0 0; text-shadow:0 1px 6px rgba(0,0,0,.9)}
 
   <header>
     <h1>Secret Santa</h1>
-    <p>Ciao, <b id="mio-nome"></b></p>
+    <p>Ciao, <b id="mio-nome"></b> <button id="esci" type="button">Non sei tu? Esci</button></p>
   </header>
+
+  <section id="regalo" class="vetro" aria-live="polite" hidden>
+    <div id="regalo-fatto" hidden>
+      <p class="etich">Il tuo regalo è per</p>
+      <div class="volto-regalo" id="regalo-volto" role="img"></div>
+      <p class="nome-regalo" id="regalo-nome"></p>
+      <p class="nota">Tienilo per te fino alla fine del Fanta-Santa.</p>
+    </div>
+    <div id="regalo-dafare" hidden>
+      <p class="etich">Il tuo Secret Santa</p>
+      <p class="invito">Non hai ancora fatto il sorteggio.</p>
+      <button class="vai" type="button" id="vai-slot">Vai alla slot</button>
+    </div>
+  </section>
 
   <section id="conto" class="vetro" aria-label="Conto alla rovescia">
     <p class="etich">Alla serata dello scambio</p>
@@ -141,7 +168,7 @@ header p{font-size:14.5px; margin:2px 0 0; text-shadow:0 1px 6px rgba(0,0,0,.9)}
       <div id="viso"></div>
     </div>
     <p id="babbo-nome">—</p>
-    <p id="babbo-sotto">Domani tocca a qualcun altro.</p>
+    <p id="babbo-sotto">Uguale per tutti, cambia ogni giorno. Non è il tuo sorteggio.</p>
   </section>
 
   <nav id="sezioni" aria-label="Sezioni">
@@ -188,7 +215,20 @@ function scriviData(){
     ', ore '+SERATA.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
 }
 scriviData();
-SS.api('stato').then(s=>{if(s.dataSerata){SERATA=new Date(s.dataSerata);scriviData();}}).catch(()=>{});
+SS.api('stato').then(s=>{
+  if(s.dataSerata){SERATA=new Date(s.dataSerata);scriviData();}
+  // il tuo regalo: si mostra solo dopo che hai fatto il sorteggio con la slot
+  const box=document.getElementById('regalo');
+  if(s.visto&&s.destinatario){
+    document.getElementById('regalo-volto').style.backgroundImage='url("'+SS.foto(s.destinatario)+'")';
+    document.getElementById('regalo-volto').setAttribute('aria-label','Foto di '+s.destinatario);
+    document.getElementById('regalo-nome').textContent=s.destinatario;
+    document.getElementById('regalo-fatto').hidden=false;
+  }else document.getElementById('regalo-dafare').hidden=false;
+  box.hidden=false;
+}).catch(()=>{});
+document.getElementById('vai-slot').addEventListener('click',()=>location.href='sorteggio.html');
+document.getElementById('esci').addEventListener('click',()=>SS.esci());
 function conto(){
   let d=Math.max(0,SERATA-new Date());
   const gg=Math.floor(d/86400000); d-=gg*86400000;
