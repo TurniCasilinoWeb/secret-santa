@@ -41,7 +41,8 @@ body{margin:0; overflow:hidden; color:var(--fg); font-family:"Spectral",Georgia,
 #neve{position:fixed; inset:0; z-index:1; pointer-events:none}
 
 /* ===== macchina ===== */
-#macchina{position:relative; z-index:2; width:min(94vw, 440px, calc((100dvh - 150px) / 1.2)); container-type:inline-size}
+/* il mobile (84% della larghezza) sta al centro dello schermo; la leva sporge a destra */
+#macchina{position:relative; z-index:2; width:min(90vw, 440px, calc((100dvh - 150px) / 1.2)); container-type:inline-size; translate:8% 0}
 #macchina.trema{animation:trema .5s}
 @keyframes trema{0%,100%{transform:none}20%{transform:translateX(-1.2cqw) rotate(-.6deg)}40%{transform:translateX(1.1cqw) rotate(.6deg)}60%{transform:translateX(-.6cqw)}80%{transform:translateX(.5cqw)}}
 #mobile{position:relative; width:84cqw; filter:drop-shadow(0 3cqw 5cqw rgba(0,0,0,.7))}
