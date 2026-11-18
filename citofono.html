@@ -98,6 +98,10 @@ body{margin:0; background:var(--bg); color:var(--fg); font-family:"Spectral",Geo
   background:linear-gradient(180deg,#ffe9a8,var(--gold) 55%,var(--gold-deep));
   box-shadow:0 0 0 2px var(--gold-deep), 0 4px 10px rgba(0,0,0,.45)}
 #suona:active{transform:scale(.97)}
+#suona:disabled{cursor:wait; filter:saturate(.6) brightness(.9)}
+#suona.attesa::after{content:""; display:inline-block; width:.9em; height:.9em; margin-left:.5em; vertical-align:-.1em;
+  border:2px solid #2a1502; border-right-color:transparent; border-radius:50%; animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
 #suona:focus-visible,#modulo input:focus-visible,#chiudi:focus-visible{outline:3px solid #241503; outline-offset:2px}
 #chiudi{align-self:flex-end; cursor:pointer; background:none; border:1px solid rgba(243,234,215,.5); color:var(--fg);
   border-radius:999px; font-size:13px; padding:4px 12px; font-family:"Spectral",serif}
@@ -161,12 +165,12 @@ body{margin:0; background:var(--bg); color:var(--fg); font-family:"Spectral",Geo
       <div class="targa-nome" style="left:31.3%;top:69.9%">Andrea</div>
       <div class="targa-nome" style="left:53.2%;top:69.9%">Chiara</div>
     </div>
-    <div id="modulo">
+    <form id="modulo" novalidate>
       <p>Scrivi il tuo nome utente e la parola d'ordine</p>
       <input id="campo-nome" type="text" placeholder="nome utente" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
       <input id="campo-pass" type="password" placeholder="parola d'ordine" autocomplete="current-password">
-      <button id="suona">🔔 Citofona</button>
-    </div>
+      <button id="suona" type="submit">🔔 Citofona</button>
+    </form>
   </div>
 </div>
 
@@ -221,17 +225,22 @@ const pass=document.getElementById('campo-pass');
 if(SS.sessione())location.replace('home.html');
 
 let inCorso=false;
-document.getElementById('suona').addEventListener('click',async()=>{
+const bottone=document.getElementById('suona');
+// Si entra col pulsante o col tasto "Vai" della tastiera. Mentre lo script risponde
+// (la prima volta può impiegare qualche secondo) il pulsante mostra che sta lavorando.
+document.getElementById('modulo').addEventListener('submit',async e=>{
+  e.preventDefault();
   if(inCorso)return;
   if(!nome.value.trim()||!pass.value){caccia('Scrivi nome utente e parola d’ordine.');return;}
   inCorso=true;
+  document.activeElement&&document.activeElement.blur();   // chiude la tastiera
+  bottone.disabled=true;bottone.textContent='Sto citofonando…';bottone.classList.add('attesa');
   suono('campanello');
   const attesa=new Promise(r=>setTimeout(r,1300));          // il tempo del ding-dong
-  try{ await Promise.all([SS.accedi(nome.value,pass.value),attesa]); apri(); }
-  catch(e){ await attesa; caccia(e.codice==='credenziali'?null:e.message); }
-  finally{ inCorso=false; }
+  try{ await Promise.all([SS.accedi(nome.value,pass.value),attesa]); bottone.textContent='Porta aperta'; apri(); }
+  catch(err){ await attesa; caccia(err.codice==='credenziali'?null:err.message); bottone.textContent='🔔 Citofona'; bottone.disabled=false; }
+  finally{ inCorso=false; bottone.classList.remove('attesa'); }
 });
-pass.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('suona').click()});
 
 function caccia(messaggio){
   suono('ronzatore');
